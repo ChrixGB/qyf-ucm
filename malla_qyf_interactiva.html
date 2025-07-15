@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Malla Interactiva Química y Farmacia</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      padding: 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 10px;
+    }
+    .ramo {
+      background-color: #e6f2ff;
+      border: 2px solid #007acc;
+      padding: 10px;
+      text-align: center;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-size: 12px;
+    }
+    .ramo.locked {
+      background-color: #ccc;
+      border-color: #999;
+      cursor: not-allowed;
+    }
+    .ramo.completed {
+      background-color: #c2f0c2;
+      border-color: #33cc33;
+    }
+  </style>
+</head>
+<body>
+  <h2>Malla Interactiva Química y Farmacia</h2>
+  <p>Haz clic en un ramo para marcarlo como completado. Se desbloquearán automáticamente los que dependen de él.</p>
+  <div class="grid" id="malla"></div>
+
+  <script>
+    const ramos = [
+      { id: 'mat1', nombre: 'Matemática I', requisitos: [] },
+      { id: 'mat2', nombre: 'Matemática II', requisitos: ['mat1'] },
+      { id: 'fisica', nombre: 'Física Aplicada a las Ciencias Farmacéuticas', requisitos: ['mat1'] },
+      { id: 'quim1', nombre: 'Química General I', requisitos: [] },
+      { id: 'quim2', nombre: 'Química General II', requisitos: ['quim1'] },
+      { id: 'qanal', nombre: 'Química Analítica Cualitativa y Cuantitativa', requisitos: ['quim2'] },
+      { id: 'qorga1', nombre: 'Química Orgánica Farmacéutica I', requisitos: ['quim2'] },
+      { id: 'qorga2', nombre: 'Química Orgánica Farmacéutica II', requisitos: ['qorga1'] },
+      { id: 'bio1', nombre: 'Biología General y Molecular', requisitos: [] },
+      { id: 'bio2', nombre: 'Biología Celular y Molecular', requisitos: ['bio1'] },
+      { id: 'morf1', nombre: 'Morfología Humana I', requisitos: ['bio1'] },
+      { id: 'morf2', nombre: 'Morfología Humana II', requisitos: ['morf1'] },
+      { id: 'gen', nombre: 'Genética y Genómica Farmacéutica', requisitos: ['bio2'] },
+      { id: 'introFarm1', nombre: 'Introducción a la Farmacia y las Ciencias I', requisitos: [] },
+      { id: 'introFarm2', nombre: 'Introducción a la Farmacia y las Ciencias II', requisitos: ['introFarm1'] },
+      { id: 'bioqclin', nombre: 'Bioquímica Clínica', requisitos: ['qorga2', 'bio2'] },
+      { id: 'micro1', nombre: 'Fundamentos de Microbiología y Bacteriología', requisitos: ['bio2'] },
+      { id: 'micro2', nombre: 'Microbiología y Parasitología', requisitos: ['micro1'] },
+      { id: 'farmaco1', nombre: 'Farmacología I', requisitos: ['bioqclin'] },
+      { id: 'farmaco2', nombre: 'Farmacología II', requisitos: ['farmaco1'] },
+      { id: 'tox', nombre: 'Toxicología', requisitos: ['farmaco2'] },
+      { id: 'fquim1', nombre: 'Farmacoquímica I', requisitos: ['farmaco1'] },
+      { id: 'fquim2', nombre: 'Farmacoquímica II', requisitos: ['fquim1'] },
+      { id: 'tec1', nombre: 'Tecnología Farmacéutica I', requisitos: ['qanal'] },
+      { id: 'tec2', nombre: 'Tecnología Farmacéutica II', requisitos: ['tec1'] },
+      { id: 'biofarma', nombre: 'Biofarmacia y Farmacocinética Clínica', requisitos: ['farmaco2'] },
+      { id: 'clin1', nombre: 'Farmacia Clínica I', requisitos: ['farmaco2'] },
+      { id: 'clin2', nombre: 'Farmacia Clínica II', requisitos: ['clin1'] },
+      { id: 'clin3', nombre: 'Farmacia Clínica III', requisitos: ['clin2'] },
+      { id: 'pprof', nombre: 'Práctica Profesional', requisitos: ['clin3'] }
+    ];
+
+    const estado = JSON.parse(localStorage.getItem('estadoRamos') || '{}');
+
+    function renderMalla() {
+      const contenedor = document.getElementById('malla');
+      contenedor.innerHTML = '';
+      for (const ramo of ramos) {
+        const div = document.createElement('div');
+        div.className = 'ramo';
+        div.textContent = ramo.nombre;
+        div.id = ramo.id;
+
+        const completado = estado[ramo.id] === true;
+        const desbloqueado = ramo.requisitos.every(id => estado[id]);
+
+        if (!completado && !desbloqueado && ramo.requisitos.length > 0) {
+          div.classList.add('locked');
+        }
+        if (completado) {
+          div.classList.add('completed');
+        }
+
+        div.addEventListener('click', () => {
+          if (div.classList.contains('locked')) return;
+          estado[ramo.id] = !estado[ramo.id];
+          localStorage.setItem('estadoRamos', JSON.stringify(estado));
+          renderMalla();
+        });
+
+        contenedor.appendChild(div);
+      }
+    }
+
+    renderMalla();
+  </script>
+</body>
+</html>
