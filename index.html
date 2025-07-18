@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Malla Química y Farmacia</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #e0f7f4;
+    }
+    h2 {
+      text-align: center;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .ramo {
+      padding: 10px;
+      background: white;
+      border: 1px solid #94d6cb;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .ramo.locked {
+      background: #cfe8e5;
+      color: #7da4a0;
+      cursor: not-allowed;
+    }
+    .ramo.completed {
+      text-decoration: line-through;
+      background: #a6e3d5;
+      color: #1a5c4d;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Malla Interactiva Química y Farmacia</h2>
+<div class="grid" id="malla">
+<!-- Aquí irán todos los ramos -->
+</div>
+
+<script>
+const data = [
+  {id: "QYF-111", nombre: "Química General I"},
+  {id: "QYF-112", nombre: "Biología Celular y Molecular"},
+  {id: "QYF-113", nombre: "Morfología Humana I"},
+  {id: "QYF-114", nombre: "Matemática I"},
+  {id: "QYF-116", nombre: "Introducción a la Farmacia y las Ciencias I"},
+  {id: "QYF-AEF", nombre: "Aprendizaje Eficiente"},
+  {id: "QYF-121", nombre: "Química General II", prereq: ["QYF-111"]},
+  {id: "QYF-122", nombre: "Bioquímica General y Molecular", prereq: ["QYF-112"]},
+  {id: "QYF-123", nombre: "Morfología Humana II", prereq: ["QYF-113"]},
+  {id: "QYF-124", nombre: "Matemática II", prereq: ["QYF-114"]},
+  {id: "QYF-125", nombre: "Física Aplicada a las Cs. Farmacéuticas", prereq: ["QYF-114"]},
+  {id: "QYF-126", nombre: "Introducción a la Farmacia y las Ciencias II", prereq: ["QYF-116"]},
+  {id: "IFG-100", nombre: "Inglés I"},
+  {id: "QYF-211", nombre: "Química Analítica Cualitativa y Cuantitativa", prereq: ["QYF-121"]},
+  {id: "QYF-212", nombre: "Química Orgánica Farmacéutica I", prereq: ["QYF-121"]},
+  {id: "QYF-213", nombre: "Introducción a la Intervención Farmacológica I", prereq: ["QYF-122"]},
+  {id: "QYF-214", nombre: "Bioestadística Farmacéutica", prereq: ["QYF-124"]},
+  {id: "QYF-215", nombre: "Fisicoquímica Farmacéutica", prereq: ["QYF-121","QYF-125"]},
+  {id: "QYF-216", nombre: "Taller de Iniciación Farmacéutica", prereq: ["QYF-126"]},
+  {id: "IFG-200", nombre: "Inglés II", prereq: ["IFG-100"]},
+  {id: "QYF-221", nombre: "Análisis Instrumental para Cs Farmacéuticas", prereq: ["QYF-211","QYF-215"]},
+  {id: "QYF-222", nombre: "Química Orgánica Farmacéutica II", prereq: ["QYF-212"]},
+  {id: "QYF-223", nombre: "Introducción a la Intervención Farmacológica II", prereq: ["QYF-213"]},
+  {id: "QYF-224", nombre: "Elementos Inmunes de la Terapéutica", prereq: ["QYF-122"]},
+  {id: "QYF-225", nombre: "Genética y Genómica Farmacéutica", prereq: ["QYF-122"]},
+  {id: "QYF-226", nombre: "Taller de Formación Farmacéutica (HITO I)", prereq: ["QYF-211","QYF-212","QYF-213"]},
+  {id: "QYF-312", nombre: "Bioquímica Clínica", prereq: ["QYF-222"]},
+  {id: "QYF-313", nombre: "Fund. de Salud Alterada y Fármacos I", prereq: ["QYF-223","QYF-225"]},
+  {id: "QYF-314", nombre: "Fund. Microbiología y Bacteriología", prereq: ["QYF-224"]},
+  {id: "QYF-315", nombre: "Epidemiología y Salud Pública"},
+  {id: "QYF-316", nombre: "Farmacología I", prereq: ["QYF-223","QYF-225"]},
+  {id: "QYF-317", nombre: "Introducción a la Fe"},
+  {id: "QYF-321", nombre: "Farmacoquímica I", prereq: ["QYF-312"]},
+  {id: "QYF-322", nombre: "Farmacognosia", prereq: ["QYF-316"]},
+  {id: "QYF-323", nombre: "Fund. de Salud Alterada y Fármacos II", prereq: ["QYF-313"]},
+  {id: "QYF-324", nombre: "Microbiología y Parasitología", prereq: ["QYF-314"]},
+  {id: "QYF-325", nombre: "Relaciones Interpersonales"},
+  {id: "QYF-326", nombre: "Farmacología II", prereq: ["QYF-316"]},
+  {id: "QYF-327", nombre: "Ética Cristiana"},
+  {id: "QYF-412", nombre: "Toxicología", prereq: ["QYF-326"]},
+  {id: "QYF-413", nombre: "Tecnología Farmacéutica I", prereq: ["QYF-322"]},
+  {id: "QYF-414", nombre: "Gestión Farmacéutica", prereq: ["QYF-325"]},
+  {id: "QYF-415", nombre: "Iniciación a la Farmacia Clínica", prereq: ["QYF-323","QYF-324","QYF-326"]},
+  {id: "QYF-416", nombre: "Certificación I"},
+  {id: "QYF-421", nombre: "Nutrición Clínica", prereq: ["QYF-415"]},
+  {id: "QYF-422", nombre: "Electivo I"},
+  {id: "QYF-423", nombre: "Tecnología Farmacéutica II", prereq: ["QYF-413"]},
+  {id: "QYF-424", nombre: "Diseño Computacional"},
+  {id: "QYF-425", nombre: "Biofarmacia y Farmacocinética Clínica", prereq: ["QYF-415"]},
+  {id: "QYF-426", nombre: "Farmacia Clínica I", prereq: ["QYF-415","QYF-412"]},
+  {id: "QYF-427", nombre: "Legislación Farmacéutica"},
+  {id: "QYF-511", nombre: "Electivo II"},
+  {id: "QYF-512", nombre: "Farmacia Asistencial", prereq: ["QYF-421","QYF-423"]},
+  {id: "QYF-513", nombre: "Manejo de Bases de Datos"},
+  {id: "QYF-514", nombre: "Asuntos Regulatorios"},
+  {id: "QYF-515", nombre: "Farmacia Clínica II", prereq: ["QYF-425","QYF-426"]},
+  {id: "QYF-516", nombre: "Certificación II"},
+  {id: "QYF-611", nombre: "Electivo III"},
+  {id: "QYF-612", nombre: "Farmacovigilancia y Farmacoeconomía", prereq: ["QYF-512"]},
+  {id: "QYF-613", nombre: "Farmacia Clínica III", prereq: ["QYF-515"]},
+  {id: "QYF-614", nombre: "Atención Farmacéutica", prereq: ["QYF-515","QYF-512"]},
+  {id: "QYF-615", nombre: "Metodología de Proyectos"},
+  {id: "QYF-616", nombre: "Certificación III"},
+  {id: "QYF-700", nombre: "Práctica Profesional", prereq: ["QYF-613"]}
+];
+
+const grid = document.getElementById("malla");
+
+function renderRamos() {
+  data.forEach(ramo => {
+    const div = document.createElement("div");
+    div.className = "ramo";
+    div.textContent = ramo.nombre;
+    div.dataset.id = ramo.id;
+    if (ramo.prereq) {
+      div.classList.add("locked");
+      div.dataset.prereq = ramo.prereq.join(",");
+    }
+    if (localStorage.getItem(ramo.id) === "completed") {
+      div.classList.add("completed");
+    }
+    grid.appendChild(div);
+  });
+}
+
+function updateMalla() {
+  document.querySelectorAll(".ramo").forEach(ramo => {
+    const prereq = ramo.dataset.prereq;
+    if (!prereq) return;
+    const prereqIds = prereq.split(",");
+    const completed = prereqIds.every(id => {
+      const prereqRamo = document.querySelector(`.ramo[data-id="${id}"]`);
+      return prereqRamo && prereqRamo.classList.contains("completed");
+    });
+    ramo.classList.toggle("locked", !completed);
+  });
+}
+
+grid.addEventListener("click", e => {
+  const el = e.target.closest(".ramo");
+  if (!el || el.classList.contains("locked")) return;
+  el.classList.toggle("completed");
+  localStorage.setItem(el.dataset.id, el.classList.contains("completed") ? "completed" : "");
+  updateMalla();
+});
+
+renderRamos();
+updateMalla();
+</script>
+
+</body>
+</html>
